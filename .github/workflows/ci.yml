@@ -76,21 +76,27 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Set image metadata
         id: meta
         run: |
           echo "ecr_registry=${{ steps.login-ecr.outputs.registry }}" >> "$GITHUB_OUTPUT"
           echo "image_tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push Docker image
+      - name: Build and push Mismatch Docker image (Error Trigger)
         env:
-          ECR_REGISTRY: ${{ steps.meta.outputs.ecr_registry }}
+          ECR_REGISTRY: ${{ steps.meta.outputs.registry }}
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
         run: |
-          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" -f Docker-files/app/multistage/Dockerfile .
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+          docker buildx build \
+            --platform linux/arm64 \
+            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
+            -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
+            -f Docker-files/app/multistage/Dockerfile \
+            --push .
 
   update-helm:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
