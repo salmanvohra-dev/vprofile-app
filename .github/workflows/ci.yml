@@ -87,17 +87,16 @@ jobs:
 
       - name: Build and push Mismatch Docker image (Error Trigger)
         env:
-          ECR_REGISTRY: ${{ steps.meta.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
         run: |
           docker buildx build \
             --platform linux/arm64 \
-            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
-            -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
+            -t "${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:$IMAGE_TAG" \
+            -t "${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:latest" \
             -f Docker-files/app/multistage/Dockerfile \
             --push .
-
   update-helm:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: docker-build-push
