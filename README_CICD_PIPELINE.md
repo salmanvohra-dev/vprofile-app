@@ -1,6 +1,7 @@
 # vprofile-app GitHub Actions CI/CD Pipeline - IMPLEMENTATION COMPLETE ✅
 # This repository contains a fully implemented GitHub Actions CI/CD pipeline for a Java 21 Maven WAR project, integrated with SonarQube, Docker, Amazon ECR, and Helm.
 ## Quick Start (30 minutes)
+# best waauy to get started
 
 **Your GitHub Actions CI/CD pipeline is ready!** Follow these quick steps:
 
